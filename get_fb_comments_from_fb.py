@@ -44,7 +44,7 @@ def unicode_decode(text):
 def getFacebookCommentFeedUrl(base_url):
 
     # Construct the URL string
-    fields = "&fields=id,message,reactions.limit(0).summary(true)" + \
+    fields = "&fields=id,message,is_hidden,reactions.limit(0).summary(true)" + \
         ",created_time,comments,from,attachment"
     url = base_url + fields
 
@@ -88,6 +88,7 @@ def processFacebookComment(comment, status_id, parent_id=''):
     # so must check for existence first
 
     comment_id = comment['id']
+    comment_is_hidden  = comment['is_hidden'] #See if message is hidden
     comment_message = '' if 'message' not in comment or comment['message'] \
         is '' else unicode_decode(comment['message'])
     comment_author = unicode_decode(comment['from']['name'])
@@ -113,14 +114,14 @@ def processFacebookComment(comment, status_id, parent_id=''):
 
     # Return a tuple of all processed data
 
-    return (comment_id, status_id, parent_id, comment_message, comment_author,
+    return (comment_id, comment_is_hidden, status_id, parent_id, comment_message, comment_author,
             comment_published, num_reactions)
 
 
 def scrapeFacebookPageFeedComments(page_id, access_token):
     with open('{}_facebook_comments.csv'.format(file_id), 'w') as file:
         w = csv.writer(file)
-        w.writerow(["comment_id", "status_id", "parent_id", "comment_message",
+        w.writerow(["comment_id","comment_is_hidden", "status_id", "parent_id", "comment_message",
                     "comment_author", "comment_published", "num_reactions",
                     "num_likes", "num_loves", "num_wows", "num_hahas",
                     "num_sads", "num_angrys", "num_special"])
